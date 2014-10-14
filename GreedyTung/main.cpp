@@ -6,7 +6,8 @@
 //  Copyright (c) 2014 ___IWINLAB___. All rights reserved.
 //
 
-#include <iostream>
+
+#include "mainclass.h"
 
 int main(int argc, const char * argv[]) {
     // insert code here...
