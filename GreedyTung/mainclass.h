@@ -23,11 +23,11 @@ public:
     void decrement_Router_num();
 };
 
-
 class Router{
     int Router_ID;
     int address_x, address_y;
     Subnet* subnet;
+    
 public:
     void set_Router_ID(int r_ID){ Router_ID = r_ID; }
     int get_Router_ID(){ return Router_ID; }
@@ -37,6 +37,29 @@ public:
     int get_address_y(){ return address_y; }
     
 };
+
+class Link{
+    int Link_ID;
+    float capacity, utilized_capacity;
+    Router *router_A, *router_B;
+public:
+    void set_Link_ID(int l_id){ Link_ID = l_id; }
+    int get_Link_ID(){ return Link_ID; }
+    float get_capacity(){ return capacity; }
+    float get_utilized_capasity(){ return utilized_capacity; }
+    void set_capacity(float cpt){ capacity = cpt; }
+    void add_capacity_utilization(float ult);
+    bool set
+};
+
+void Link::add_capacity_utilization(float ult){
+    if (utilized_capacity+ult>capacity) {
+        cout<<"Beyond the capacity of this link: "<< Link_ID<<endl;
+    }else{
+        utilized_capacity = utilized_capacity + ult;
+    }
+
+}
 
 void Subnet::decrement_Router_num(){
     if (Router_num - 1 < 0) {
