@@ -41,7 +41,7 @@ public:
 class Link{
     int Link_ID;
     float capacity, utilized_capacity;
-    Router *router_A, *router_B;
+	Router *router[2];
 public:
     void set_Link_ID(int l_id){ Link_ID = l_id; }
     int get_Link_ID(){ return Link_ID; }
@@ -49,8 +49,24 @@ public:
     float get_utilized_capasity(){ return utilized_capacity; }
     void set_capacity(float cpt){ capacity = cpt; }
     void add_capacity_utilization(float ult);
-    bool set
+	bool set_router(Router *port_router);
+	
 };
+
+bool Link::set_router(Router *port_router){
+	if (router[0] == NULL){
+		router[0] = port_router;
+		return true;
+	}
+	else if (router[1] == NULL){
+		router[1] = port_router;
+		return true;
+	}
+	else{
+		cout << "Can not set more than 2 port Router to Link: " << Link_ID << endl;
+	}
+	return false;
+}
 
 void Link::add_capacity_utilization(float ult){
     if (utilized_capacity+ult>capacity) {
