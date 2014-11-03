@@ -53,7 +53,7 @@ class Link{
 	string Link_type;
     int Link_ID;
     float capacity, utilized_capacity;
-	Router *router[2];
+	vector<Router*> port_router_vec;
 public:
 	void set_Link_type(string L_type){ Link_type = L_type; }
 	string get_Link_type(){ return Link_type;  }
@@ -61,89 +61,14 @@ public:
     int get_Link_ID(){ return Link_ID; }
     float get_capacity(){ return capacity; }
     float get_utilized_capasity(){ return utilized_capacity; }
-    void set_capacity(float cpt){ capacity = cpt; }
+	void set_capacity(float cpt){ capacity = cpt; utilized_capacity = 0; }
     void add_capacity_utilization(float ult);
 	void minus_capacity_utilization(float ult);
 	bool set_router(Router *port_router);
-	Router **get_router_arr(){ return router; }
+	vector<Router*> get_router_arr(){ return port_router_vec; }
 	Router *get_another_router(Router *ori_router);
 };
 
 
-
-Router *Link::get_another_router(Router *ori_router){
-	if (router[0] != NULL && router[1] != NULL){
-		if (router[0] == ori_router){
-			return router[1];
-		}
-		else if (router[1] == ori_router){
-			return router[0];
-		}
-		else{
-			cout << "Router: " << ori_router->get_Router_ID() << " dose not belong to Link: " << Link_ID << endl;
-		}
-	}
-	else{
-		cout << "ERROR! : Link: " << Link_ID << " has not been fully initialized!" << endl;
-	}
-	return NULL;
-}
-
-bool Link::set_router(Router *port_router){
-	if (router[0] == NULL){
-		router[0] = port_router;
-		return true;
-	}
-	else if (router[1] == NULL){
-		router[1] = port_router;
-		return true;
-	}
-	else{
-		cout << "ERROR! : Can not set more than 2 port Router to Link: " << Link_ID << endl;
-	}
-	return false;
-}
-
-void Link::add_capacity_utilization(float ult){
-    if (utilized_capacity+ult>capacity) {
-        cout<<"ERROR! : Beyond the capacity of this link: "<< Link_ID<<endl;
-    }else{
-        utilized_capacity = utilized_capacity + ult;
-    }
-
-}
-
-void Link::minus_capacity_utilization(float ult){
-	if (utilized_capacity - ult < 0){
-		cout << "ERROR! : Link: " << Link_ID << " capacity utilization can not below 0!" << endl;
-	}
-	else{
-		utilized_capacity = utilized_capacity - ult;
-	}
-}
-
-void Subnet::decrement_Router_num(){
-    if (Router_num - 1 < 0) {
-        cout<<"ERROR! : Subnet: "<<Subnet_ID<<" can not have a negative number of Routers!"<<endl;
-    }else{
-        Router_num -= 1;
-    }
-}
-
-void Router::add_Link(Link * lk){
-	Link_vec.push_back(lk);
-}
-
-Link* Router::get_inter_Link(int R_ID){
-	vector<Link*>::iterator it;
-	int another_R_id;
-	for (it = Link_vec.begin(); it != Link_vec.end(); it++){
-		another_R_id = (*it)->get_another_router(this)->get_Router_ID();
-		if (another_R_id == R_ID){
-			return *it;
-		}
-	}
-	return NULL;
-}
 
 #endif
