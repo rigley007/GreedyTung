@@ -18,7 +18,7 @@ private:
 public:
     Dijkstra(void);
     int solve(MapManager *map, int source, int destination);
-	vector<int> displayPath(MapManager *map, int destination);
+	search_result displayPath(MapManager *map, int destination);
 };
 
 #endif	/* DIJKSTRA_HPP */

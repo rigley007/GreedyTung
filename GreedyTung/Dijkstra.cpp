@@ -10,9 +10,9 @@ Dijkstra::Dijkstra(void) {
     }
 }
 
-vector<int> Dijkstra::displayPath(MapManager *map, int destination) {
+search_result Dijkstra::displayPath(MapManager *map, int destination) {
     OrderedSet shortestPath;
-	vector<int> route_vec;
+	search_result result;
     do {
         shortestPath.insert(destination);
         if (predecessor[destination] == UNDEFINED_LMARK)
@@ -20,8 +20,8 @@ vector<int> Dijkstra::displayPath(MapManager *map, int destination) {
         destination = predecessor[destination];
     } while (1);
 	//cout << "number of element: " << shortestPath.getNumElements() << endl;
-    route_vec = shortestPath.printNames(map, 0);
-	return route_vec;
+	result = shortestPath.printNames(map, 0);
+	return result;
 }
 
 int Dijkstra::solve(MapManager *map, int source, int destination) {

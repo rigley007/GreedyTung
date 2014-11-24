@@ -102,12 +102,13 @@ void OrderedSet::print(bool printForward) {
     cout << "}" << endl;
 }
 
-vector<int> OrderedSet::printNames(MapManager *map, bool printForward) {
+search_result OrderedSet::printNames(MapManager *map, bool printForward) {
     struct nodeStruct *temp;
     int i, cost, totalCost = 0;
+	search_result result;
 	vector<int> route_vec;
 	char *ss;
-
+	/*
     if (printForward) {
         cout << "From : " << map->getLandmarkName(head->element) << endl;
         cout << "  To : " << map->getLandmarkName(tail->element) << endl << endl;
@@ -119,19 +120,19 @@ vector<int> OrderedSet::printNames(MapManager *map, bool printForward) {
     cout << "----------------------------------------------" << endl;
     cout << "#  Cost  From-To" << endl;
     cout << "----------------------------------------------" << endl;
-
+	*/
     if (printForward)
         for (temp = head, i = 1; temp->next != NULL; temp = temp->next, ++i) {
             cost = map->getWeight(temp->element, temp->next->element);
             totalCost += cost;
 			route_vec.push_back((int)(map->getLandmarkName(temp->element)));
-            cout << i << " | "
+            /*cout << i << " | "
                     << (cost > 9 ? "" : " ")
                     << cost << " | "
                     << map->getLandmarkName(temp->element)
                     << " -> "
                     << map->getLandmarkName(temp->next->element)
-                    << endl;
+                    << endl;*/
         } else
         for (temp = tail, i = 1; temp->prev != NULL; temp = temp->prev, ++i) {
             cost = map->getWeight(temp->element, temp->prev->element);
@@ -142,20 +143,22 @@ vector<int> OrderedSet::printNames(MapManager *map, bool printForward) {
 				ss = map->getLandmarkName(temp->prev->element);
 				route_vec.push_back(atoi(ss));
 			}
-            cout << i << " | "
+            /*cout << i << " | "
                     << (cost > 9 ? "" : " ")
                     << cost << " | "
                     << map->getLandmarkName(temp->element)
                     << " -> "
                     << map->getLandmarkName(temp->prev->element)
-                    << endl;
+                    << endl;*/
         }
 
-    cout << "----------------------------------------------" << endl;
+   /* cout << "----------------------------------------------" << endl;
     cout << "Total cost of the route: " << totalCost << endl;
     cout << "----------------------------------------------" << endl;
-
-	return route_vec;
+	*/
+		result.route_vec = route_vec;
+		result.total_cost = totalCost;
+		return result;
 }
 
 int OrderedSet::nthElement(int n, bool searchForward) {

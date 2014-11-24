@@ -11,12 +11,25 @@
 #include <iostream>
 #include <vector>
 #include <string>
+//#include "MapManager.hpp"
 
 using namespace std;
 
 class Subnet;
 class Router;
 class Link;
+
+struct traffic_demand{
+
+	int source;
+	int destination;
+	float t_d;
+	traffic_demand(int s, int d, float td) : source(s), destination(d), t_d(td*8) {}
+	bool operator < (const traffic_demand& str) const
+	{
+		return (t_d > str.t_d);
+	}
+};
 
 
 class Subnet{
@@ -69,6 +82,14 @@ public:
 	Router *get_another_router(Router *ori_router);
 };
 
+struct check_result{
+	bool result;
+	float unutilized_capa;
+	int r_left, r_right;
+};
 
+check_result check_route(vector<int> route_vec, float t_d, vector<Router*> routers_vec);
+void update_routelinks(vector<int> route_vec, float t_d, vector<Router*> routers_vec);
+void create_longlink(int source, int dest, float t_d, vector<Router*> routers_vec, vector<Link*> &links_vec);
 
 #endif

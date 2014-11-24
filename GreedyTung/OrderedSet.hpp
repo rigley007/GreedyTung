@@ -41,7 +41,7 @@ public:
     // flag is true, the landmarks are printed in forward order
     // (head to tail); otherwise, they are printed in the
     // reverse order (tail to head).
-    vector<int> printNames(MapManager *map, bool printForward);
+	search_result printNames(MapManager *map, bool printForward);
 
     // Returns the nth element in the landmark set. If searchForward
     // flag is true, counting begins at the head; otherwise, counting

@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include "mainclass.h"
 #include <fstream>
+#include <vector>
+#include <algorithm>
 //#include "OrderedSet.hpp"
 
 using namespace std;
@@ -18,6 +20,8 @@ const int UNDEFINED_LMARK = -1;
 
 const float SHORT_LINK_CAPASITY = 20000; //Megabit/s
 const float LONG_LINK_CAPASITY = 50000; //Megabit/s
+const int LONG_LINK_COST = 5000;
+const int LINK_CONGESTION = 10000000;
 
 /**
  * Stores information about a landmark.
@@ -27,6 +31,15 @@ typedef struct landmarkStruct {
     char name[MAX_LMARK_NAME];
     struct landmarkStruct *next, *prev;
 } landmarkStructType;
+
+//////
+
+struct search_result{
+	vector<int> route_vec;
+	int total_cost;
+};
+
+
 
 /**
  * Error codes.

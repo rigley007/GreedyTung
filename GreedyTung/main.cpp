@@ -2,7 +2,7 @@
 #include "Dijkstra.hpp"
 #include "FloydWarshall.hpp"
 //#include "OrderedSet.hpp"
-//#include "mainclass.hpp"
+//#include "mainclass.h"
 
 const char helpMessage[] =
         "USAGE: \n\n"
@@ -31,15 +31,15 @@ const char helpMessage[] =
         "       shortest locations.map\n\n"
         ;
 
-vector<int> runDijkstra(MapManager *map, int source, int destination) {
+search_result runDijkstra(MapManager *map, int source, int destination) {
     Dijkstra djtra;
-	vector<int> route_vec;
+	search_result result;
 	//OrderedSet result;
 
     djtra.solve(map, source, destination);
-	route_vec = djtra.displayPath(map, destination);
+	result = djtra.displayPath(map, destination);
 	//return result;
-	return route_vec;
+	return result;
 }
 
 void runFloydWarshall(MapManager *map) {
@@ -67,52 +67,100 @@ int getLandmarkIndex(MapManager *map, const char *str) {
 
 int main(int argc, char *argv[]) {
     MapManager map;
-    int source, destination;
+	int source, destination, l_num = 0;
 	vector<int> route_vec;
 	vector<int>::iterator it;
+	search_result s_result;
+	check_result c_result;
 	ifstream traffic_demands;
-	string t_str;
+	ofstream fout;
+	string t_str, d_str, filename;
 	double d_traffic[4100], max_td=0,td_sum=0;
-	int source_list[4100], destination_list[4100], td_num = 0, max_td_num = 0;
+	vector<traffic_demand> traffic_vec;
+	traffic_demand td_temp(-1,-1,0);
+	//int source_list[4100], destination_list[4100], td_num = 0, max_td_num = 0;
+	fout.open("results/heuristic_result.txt");
 
-    source = destination = UNDEFINED_LMARK;
-	traffic_demands.open("traffic/Radix/Radix88.txt");
-	if (!traffic_demands){
-		cout << "ERROR! : Cound not load traffic demands!" << endl;
-		exit(0);
-	}
-	while (traffic_demands){
-		traffic_demands >> t_str >> source_list[td_num] >> destination_list[td_num] >> d_traffic[td_num];
-		td_num++;
-		//cout << source << " " << destination << " " << d_traffic << endl;
-	}
+	for (int inj = 1; inj < 10; inj++){
+		source = destination = UNDEFINED_LMARK;
+		filename = "traffic/synthetic/44-UniformRandom-0.0" + to_string(inj) + ".txt";
+		traffic_demands.open(filename.c_str());
 
-	traffic_demands.close();
-
-
-	for (int i = 0; i < td_num; i++){
-		if (source_list[i] != destination_list[i] && source_list[i]< 32 && destination_list[i]>=32){
-			td_sum += d_traffic[i];
+		if (!traffic_demands){
+			cout << "ERROR! : Cound not load traffic demands!" << endl;
+			exit(0);
+		}
+		while (traffic_demands){
+			traffic_demands >> t_str >> td_temp.source >> d_str >> td_temp.destination >> td_temp.t_d;
+			//cout << td_temp.source << " " << td_temp.destination << " " << td_temp.t_d << endl;
+			if (td_temp.source != td_temp.destination && td_temp.t_d != 0)
+				traffic_vec.push_back(td_temp);
+			td_temp.source = -1;
+			td_temp.destination = -1;
+			td_temp.t_d = 0;
 		}
 
-		if (source_list[i] != destination_list[i] && source_list[i]>= 32 && destination_list[i] < 32){
-			td_sum += d_traffic[i];
+		traffic_demands.close();
+
+		sort(traffic_vec.begin(), traffic_vec.end());
+
+		map.readInputFile("locations.map");
+
+		//route_vec = runDijkstra(&map, traffic_vec[0].source, traffic_vec[0].destination);
+
+
+		
+
+		for (int i = 0; i < traffic_vec.size(); i++){
+			route_vec.clear();
+			s_result = runDijkstra(&map, traffic_vec[i].source, traffic_vec[i].destination);
+			route_vec = s_result.route_vec;
+			if (route_vec.size() != 0){
+				if (s_result.total_cost > LONG_LINK_COST){
+					create_longlink(traffic_vec[i].source, traffic_vec[i].destination, traffic_vec[i].t_d, map.Router_list_arr, map.Link_list_arr);
+					l_num++;
+					map.setWeight(traffic_vec[i].source, traffic_vec[i].destination, 1);
+					map.setWeight(traffic_vec[i].destination, traffic_vec[i].source, 1);
+				}
+				else{
+					c_result = check_route(route_vec, traffic_vec[i].t_d, map.Router_list_arr);
+					if (c_result.result){
+						update_routelinks(route_vec, traffic_vec[i].t_d, map.Router_list_arr);
+					}
+					else{
+						update_routelinks(route_vec, c_result.unutilized_capa, map.Router_list_arr);
+						map.setWeight(c_result.r_left, c_result.r_right, LINK_CONGESTION);
+						map.setWeight(c_result.r_right, c_result.r_left, LINK_CONGESTION);
+						traffic_vec[i].t_d = traffic_vec[i].t_d - c_result.unutilized_capa;
+						i--;
+
+					}
+				}
+
+			}
+			else{
+				create_longlink(traffic_vec[i].source, traffic_vec[i].destination, traffic_vec[i].t_d, map.Router_list_arr, map.Link_list_arr);
+				l_num++;
+				map.setWeight(traffic_vec[i].source, traffic_vec[i].destination, 1);
+				map.setWeight(traffic_vec[i].destination, traffic_vec[i].source, 1);
+				//cout << route_vec[0] << " " << route_vec[1] << endl;
+			}
 		}
 
-		if (d_traffic[i]>max_td && source_list[i] != destination_list[i]){
-			max_td = d_traffic[i];
-			max_td_num = i;
+		fout << "Injection Rate: 0.0" << inj << "\t Number of long links: " << l_num << endl;
+		for (int i = 0; i < map.Link_list_arr.size(); i++){
+			
+			fout << "Link ID: " << map.Link_list_arr[i]->get_Link_ID() << " Link Type: " << map.Link_list_arr[i]->get_Link_type() << " Src: " << map.Link_list_arr[i]->get_router_arr()[0]->get_Router_ID() << " Dst: " << map.Link_list_arr[i]->get_router_arr()[1
+			]->get_Router_ID() << " Capacity: " << map.Link_list_arr[i]->get_capacity() << " Utilized Capacity: " << map.Link_list_arr[i]->get_utilized_capasity() << " Utilization: " << map.Link_list_arr[i]->get_utilized_capasity() * 100 / map.Link_list_arr[i]->get_capacity() << "%\n";
 		}
+		fout << "\n\n";
+
+		l_num = 0;
+		traffic_vec.clear();
+		map = MapManager();
 	}
-	cout << "td_sum " << td_sum << endl;
-    map.readInputFile("locations.map");
-
-	route_vec = runDijkstra(&map, source_list[max_td_num], destination_list[max_td_num]);
-
-	for (it = route_vec.begin(); it != route_vec.end(); it++){
-		cout << *it << endl;
-	}
-
+    
+	fout.close();
 	/*
 	vector<Router*>::iterator it_r;
 	vector<Link*>::iterator	it_l;

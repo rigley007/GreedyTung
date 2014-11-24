@@ -1,5 +1,5 @@
 #include "mainclass.h"
-
+#include "MapManager.hpp"
 
 Router *Link::get_another_router(Router *ori_router){
 
@@ -72,4 +72,49 @@ Link* Router::get_inter_Link(int R_ID){
 		}
 	}
 	return NULL;
+}
+
+check_result check_route(vector<int> route_vec, float t_d, vector<Router*> routers_vec){
+	check_result result;
+	result.unutilized_capa = 9999999;
+	result.result = true;
+	float capa = 0, used_capa = 0;
+	Link *temp_link;
+	for (int i = 1; i < route_vec.size(); i++){
+		temp_link = routers_vec[(route_vec[i - 1])]->get_inter_Link((route_vec[i]));
+		if (temp_link == NULL){
+			cout << "Can not found inter_link!" << endl;
+			return result;
+		}
+		capa = temp_link->get_capacity();
+		used_capa = temp_link->get_utilized_capasity();
+		if ((capa - used_capa) <= t_d && (capa - used_capa) < result.unutilized_capa){
+			result.result = false;
+			result.r_left = route_vec[i - 1];
+			result.r_right = route_vec[i];
+			result.unutilized_capa = capa - used_capa;
+		}
+	}
+	return result;
+}
+
+void update_routelinks(vector<int> route_vec, float t_d, vector<Router*> routers_vec){
+	Link *temp_link;
+	for (int i = 1; i < route_vec.size(); i++){
+		temp_link = routers_vec[(route_vec[i - 1])]->get_inter_Link((route_vec[i]));
+		temp_link->add_capacity_utilization(t_d);
+	}
+}
+
+void create_longlink(int source, int dest, float t_d, vector<Router*> routers_vec, vector<Link*> &links_vec){
+	Link *temp_link = new Link();
+	temp_link->set_capacity(LONG_LINK_CAPASITY);
+	temp_link->add_capacity_utilization(t_d);
+	temp_link->set_Link_ID(links_vec.size());
+	temp_link->set_Link_type("long");
+	temp_link->set_router(routers_vec[source]);
+	temp_link->set_router(routers_vec[dest]);
+	routers_vec[source]->add_Link(temp_link);
+	routers_vec[dest]->add_Link(temp_link);
+	links_vec.push_back(temp_link);
 }
